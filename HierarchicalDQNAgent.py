@@ -9,8 +9,7 @@ from keras.models import Sequential
 from fourrooms import Fourrooms
 from DQNAgent import DQNAgent
 from sklearn.cluster import KMeans
-
-EPISODES = 1000
+import argparse
 
 class HierarchicalDQNAgent:
     def __init__(self, state_size, primitive_action_space, num_clusters, N = 5):
@@ -62,14 +61,20 @@ class HierarchicalDQNAgent:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e","--episodes", type=int, help="number of episodes", default=1000)
+    parser.add_argument("-c","--clusters", type=int, help="number of clusters", default = 5)
+    parser.add_argument("--save_file", type=str, help="file to save model in", default = "./models/save_model1")
+    args = parser.parse_args()
+
+    EPISODES = args.episodes
+
     env = Fourrooms()
-    agent = HierarchicalDQNAgent(len(env.tostate), list(range(env.n_actions)), 5)
+    agent = HierarchicalDQNAgent(len(env.tostate), list(range(env.n_actions)), args.clusters)
 
     global_step = 0
-    # agent.load_model("same_vel_episode2 : 1000")
+    # agent.load_model("args.save_file")
     scores, episodes = [], []
-
-    EPISODES = 1000
 
     for e in range(EPISODES):
         done = False
@@ -92,20 +97,22 @@ if __name__ == "__main__":
             current_discount *= agent.discount_factor
 
             state = copy.deepcopy(next_state)
-            print("reward:", reward, "  done:", done, "  time_step:", global_step, "  epsilon:", agent.upper_agent.epsilon, "  state:", env.currentcell, "  action:", action , "  cluster:", cluster)
+            if episode_step%100 == 0:
+                print(episode_step, end = ' ', flush = True)
+            # print("global step: ", global_step, "; episode: ", e,"; episode step: ", episode_step)
+            # print("reward:", reward, "  done:", done, "  time_step:", global_step, "  epsilon:", agent.upper_agent.epsilon, "  state:", env.currentcell, "  action:", action , "  cluster:", cluster)
 
             if done:
                 scores.append(score)
                 episodes.append(e)
                 #pylab.plot(episodes, scores, 'b')
                 #pylab.savefig("./save_graph/10by10.png")
-                print("episode:", e, "  score:", score, "  memory length:", len(agent.upper_agent.memory),
+                print("\nepisode:", e, "  score:", score, "  memory length:", len(agent.upper_agent.memory),
                       "  epsilon:", agent.upper_agent.epsilon, "  number of steps:", episode_step)
-                print("\n----\n----\n-----\n-----")
+                # print("\n----\n----\n-----\n-----")
 
         if e % 100 == 0:
-        #    pass
-            agent.save_model("./models/save_model1")
+            agent.save_model(args.save_file)
 
     # end of game
     print('game over')

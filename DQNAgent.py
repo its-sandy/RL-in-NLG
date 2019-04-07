@@ -36,8 +36,8 @@ class DQNAgent:
 
     def build_model(self):
         model = Sequential()
-        model.add(Dense(100, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
-        model.add(Dense(100, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(30, input_dim=self.state_size, activation='relu', kernel_initializer='he_uniform'))
+        model.add(Dense(30, activation='relu', kernel_initializer='he_uniform'))
         model.add(Dense(self.action_size, activation='linear', kernel_initializer='he_uniform'))
         model.summary()
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
